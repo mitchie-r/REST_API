@@ -14,11 +14,27 @@ module.exports = (sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
         },
-        releaseYear: {
-            type: Sequelize.INTEGER,
+        description: {
+            type: Sequelize.TEXT,
             allowNull: false,
         },
-    }, { sequelize });
+        estimatedTime: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        materialsNeeded: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        userId: {
+            type: Sequelize.INTEGER,
+            allowNull: false, // Cannot have a course without a user
+            references: { 
+                model: 'Users', // Reference the name of your User model 
+                key: 'id' 
+            } 
+          }
+        }, { sequelize });
 
     Course.associate = (models) => {
         Course.belongsTo(models.User, {

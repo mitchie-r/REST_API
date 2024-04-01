@@ -3,6 +3,7 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
+const routes = require('./routes');
 const models = require('./models');
 // Get references to our models.
 const { User, Course } = models;
@@ -13,27 +14,12 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 // create the Express app
 const app = express();
 
+// Setup request body JSON parsing.
+app.use(express.json());
+
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
-
-// Test the connection to the database
-(async () => {
-  try {
-    // Test the connection to the database
-    await sequelize.authenticate();
-    console.log('Connection to the database successful!');
-    process.exit();
-
-  } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      const errors = error.errors.map(err => err.message);
-      console.error('Validation errors: ', errors);
-    } else {
-      throw error;
-    }
-  }
-});
 // setup a friendly greeting for the root route
 app.get('/', (req, res) => {
   res.json({
@@ -41,6 +27,8 @@ app.get('/', (req, res) => {
   });
 });
 
+// Add routes.
+app.use('/api', routes);
 // send 404 if no other route matched
 app.use((req, res) => {
   res.status(404).json({
@@ -63,6 +51,23 @@ app.use((err, req, res, next) => {
 // set our port
 app.set('port', process.env.PORT || 5000);
 
+// Test the connection to the database
+(async () => {
+  try {
+    // Test the connection to the database
+    await sequelize.authenticate();
+    console.log('Connection to the database successful!');
+    process.exit();
+
+  } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+      const errors = error.errors.map(err => err.message);
+      console.error('Validation errors: ', errors);
+    } else {
+      throw error;
+    }
+  }
+});
 // start listening on our port
 const server = app.listen(app.get('port'), () => {
   console.log(`Express server is listening on port ${server.address().port}`);
