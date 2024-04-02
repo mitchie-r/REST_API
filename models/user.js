@@ -1,7 +1,7 @@
 'use strict';
 const { Model, DataTypes } = require('sequelize');
 const Sequelize = require('sequelize');
-
+const bcrypt = require('bcrypt');
 
 module.exports = (sequelize) => {
     class User extends Sequelize.Model { }
@@ -24,7 +24,8 @@ module.exports = (sequelize) => {
             }
         },
         lastName: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            allowNull: false
         },
         emailAddress: {
             type: DataTypes.STRING,
@@ -42,7 +43,7 @@ module.exports = (sequelize) => {
             }
         },
         password: {
-            type: DataTypes.VIRTUAL,
+            type: DataTypes.STRING,
             allowNull: false,
             validate: {
               notNull: {
@@ -55,19 +56,23 @@ module.exports = (sequelize) => {
                 args: [8, 20],
                 msg: "The password should be between 8 and 20 characters in length"
               }
+              }
             }
-          },
-    }, { sequelize });
-
-    User.associate = (models) => {
-        User.hasMany(models.Course, {
-            as: 'class', // alias
-            foreignKey: {
-                fieldName: 'userId',
-                allowNull: false,
-            },
-        });
-    };
-
+          }, { sequelize });
+        // Hook for hashing the password
+        User.beforeCreate(async (user, options) => {
+            const hashedPassword = await bcrypt.hashSync(user.password, 10);
+            user.password = hashedPassword; 
+});
+        
+        User.associate = (models) => {
+            User.hasMany(models.Course, {
+                as: 'class', // alias
+                foreignKey: {
+                    fieldName: 'userId',
+                    allowNull: false,
+                },
+            });
+        }
     return User;
 };

@@ -20,17 +20,15 @@ module.exports = (sequelize) => {
         },
         estimatedTime: {
             type: Sequelize.STRING,
-            allowNull: true,
         },
         materialsNeeded: {
             type: Sequelize.STRING,
-            allowNull: true,
         },
         userId: {
             type: Sequelize.INTEGER,
             allowNull: false, // Cannot have a course without a user
             references: { 
-                model: 'Users', // Reference the name of your User model 
+                model: 'Users', 
                 key: 'id' 
             } 
           }

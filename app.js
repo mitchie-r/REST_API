@@ -7,7 +7,7 @@ const routes = require('./routes');
 const models = require('./models');
 // Get references to our models.
 const { User, Course } = models;
-
+const Sequelize = require('./models/index.js').sequelize;
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
@@ -19,6 +19,17 @@ app.use(express.json());
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
+
+// Database connection
+(async () => {
+  try {
+    await Sequelize.authenticate();
+    Sequelize.sync();
+    console.log('Database connection successful!');
+  } catch (error) {
+    console.error('Error connecting to the database: ', error);
+  }
+})();
 
 // setup a friendly greeting for the root route
 app.get('/', (req, res) => {
@@ -51,23 +62,7 @@ app.use((err, req, res, next) => {
 // set our port
 app.set('port', process.env.PORT || 5000);
 
-// Test the connection to the database
-(async () => {
-  try {
-    // Test the connection to the database
-    await sequelize.authenticate();
-    console.log('Connection to the database successful!');
-    process.exit();
 
-  } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      const errors = error.errors.map(err => err.message);
-      console.error('Validation errors: ', errors);
-    } else {
-      throw error;
-    }
-  }
-});
 // start listening on our port
 const server = app.listen(app.get('port'), () => {
   console.log(`Express server is listening on port ${server.address().port}`);
