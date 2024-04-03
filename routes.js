@@ -74,8 +74,12 @@ router.put('/courses/:id', [
   }
   const course = await Course.findByPk(req.params.id);
   if (course) {
+    if (course.userId === req.currentUser.id) {
     await course.update(req.body);
     res.json(course);
+    } else {
+      res.status(403).json({ message: 'You are not authorized to update this course.' });
+    }
   } else {
     const error = new Error();
     error.status = 404;
