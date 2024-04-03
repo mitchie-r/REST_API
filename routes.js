@@ -29,7 +29,9 @@ router.post('/users', asyncHandler(async (req, res) => {
   }
   if (!req.body.emailAddress) {
     errors.push('Please provide a value for "emailAddress"');
-  }
+  } else if (!/^\S+@\S+\.\S+$/.test(req.body.emailAddress)) {
+    errors.push('Please provide a valid email address format (example@domain.com)'); 
+  } 
   if (!req.body.password) {
     errors.push('Please provide a value for "password"');
   }
