@@ -5,17 +5,15 @@ const User = require('./models').User;
 const Course = require('./models').Course;
 const { authenticateUser } = require('./middleware/auth-user');
 const { asyncHandler } = require('./middleware/async-handler.js');
-const { check, validationResult } = require('express-validator');
+
 
 // Construct a router instance.
 const router = express.Router();
 
 // Route that returns a list of users.
 router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
-  let users = await User.findAll({
-    attributes: { exclude: ['createdAt', 'updatedAt', 'password'] }
-  });
-  res.json(users);
+  const { firstName, lastName, emailAddress } = req.currentUser;
+  res.status(200).json( { firstName, lastName, emailAddress } );
 }));
 
 // Route that creates a new user and catches SequelizeUniqueConstraint Error
@@ -60,14 +58,7 @@ router.post('/courses', authenticateUser, asyncHandler(async (req, res) => {
 }));
 
 // Route to update a course using PUT with express validator to send an error if the title or description do not exist
-router.put('/courses/:id', [
-  check('title').exists({ checkNull: true, checkFalsy: true }).withMessage('Please provide a value for "title"'),
-  check('description').exists({ checkNull: true, checkFalsy: true }).withMessage('Please provide a value for "description"')
-], authenticateUser, asyncHandler(async (req, res) => {
-
-  // Finds validation errors in the request 
-  const errors = validationResult(req);
-  // Error handling if there are any errors
+router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {// Error handling if there are any errors
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map(error => error.msg);
     return res.status(400).json({ errors: errorMessages });
