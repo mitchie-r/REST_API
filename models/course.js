@@ -24,14 +24,6 @@ module.exports = (sequelize) => {
         materialsNeeded: {
             type: Sequelize.STRING,
         },
-        userId: {
-            type: Sequelize.INTEGER,
-            allowNull: false, // Cannot have a course without a user
-            references: { 
-                model: 'Users', 
-                key: 'id' 
-            } 
-          }
         }, { sequelize });
 
     Course.associate = (models) => {

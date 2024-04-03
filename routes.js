@@ -13,7 +13,7 @@ const router = express.Router();
 // Route that returns a list of users.
 router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
   let users = await User.findAll({
-      attributes: { exclude: ['createdAt', 'updatedAt', 'password'] }
+    attributes: { exclude: ['createdAt', 'updatedAt', 'password'] }
   });
   res.json(users);
 }));
@@ -21,16 +21,16 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
 // Route that creates a new user and catches SequelizeUniqueConstraint Error
 router.post('/users', asyncHandler(async (req, res) => {
   try {
-      await User.create(req.body);
-      res.location('/'); 
-      res.status(201).json({ message: "Account successfully created!" });
+    await User.create(req.body);
+    res.location('/');
+    res.status(201).json({ message: "Account successfully created!" });
 
   } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-          res.status(400).json({ message: 'That email address is already in use.' }); 
-      } else {
-          throw error; 
-      }
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      res.status(400).json({ message: 'That email address is already in use.' });
+    } else {
+      throw error;
+    }
   }
 }));
 
@@ -83,14 +83,19 @@ router.put('/courses/:id', [
 }));
 
 // Route to delete a course
-router.delete('courses/:id', authenticateUser, asyncHandler(async (req, res) => {
+router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
+
   if (course) {
-    await course.destroy();
-    res.status(201).end();
+    // Checks for matching userId that created the course and the user that's deleting it
+    if (course.userId === req.currentUser.id) {
+      await course.destroy();
+      res.status(204).end();
+    } else {
+      res.status(403).json({ message: 'You are not authorized to delete this course.' });
+    }
   } else {
-    const error = new Error();
-    error.status = 404;
+    res.status(404).json({ message: 'Course not found.' });
   }
 }));
 
