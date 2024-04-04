@@ -110,8 +110,7 @@ router.post('/courses', authenticateUser, asyncHandler(async (req, res) => {
           const newCourse = await Course.create(req.body);
 
           // Construct the Location header
-          const courseUri = `/api/courses/${newCourse.id}`;
-          res.location(courseUri);
+          res.location('/');
           res.status(201).end();
 
       } catch (error) {
@@ -128,7 +127,8 @@ router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
       if (course.userId !== req.currentUser.id) { // Authorization check
-          errors.push('You are not authorized to update this course.'); 
+          res.status(403).json({ message: 'You are not authorized to update this course.' }); // Updated status code
+          return; // Important to stop execution
       }
 
       // Check for missing 'title' and 'description'
