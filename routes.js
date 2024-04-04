@@ -45,7 +45,7 @@ router.post('/users', asyncHandler(async (req, res) => {
       const newUser = await User.create(req.body);
 
       // Set the status to 201 Created, add a location header, and end the response.
-      res.location(`/api/users/${newUser.id}`); // Include location header
+      res.location('/'); // Include location header
       res.status(201).end(); 
 
     } catch (error) {
